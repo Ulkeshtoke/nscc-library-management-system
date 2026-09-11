@@ -1,100 +1,354 @@
-# Library Management System (NSCC Technical Domain Task 1)
+Library Management System
 
-A full-stack, production-grade Library Management System built for colleges and institutions, featuring physical book copy tracking, individual accession-code QR generation and scanning, atomic issue/return workflows, double-issue prevention, live analytics, and XLSX reporting.
+NSCC Technical Domain Task 1
 
----
+A full-stack Library Management System built for the NSCC Technical Domain Task 1. The system manages physical book copies using unique accession codes and QR codes, supports QR-based issue and return, tracks transaction history and overdue books, manages library members, and provides downloadable Excel reports.
 
-## 1. Project Overview & Architecture
+🔗 Project Links
 
-Modern libraries manage **physical copies** of books, not just abstract titles. Each physical book copy possesses a unique **Accession Code** (e.g. `ACC-CS-001`) encoded into a barcode or QR code on its spine or inner cover.
 
-### Technology Stack
-- **Frontend**: React 19, Vite, Tailwind CSS, `html5-qrcode` (webcam scanning), Lucide Icons, Fetch API.
-- **Backend**: Node.js, Express, Mongoose ORM, `xlsx` (Excel export), `qrcode` (PNG/Data-URI generation).
-- **Database**: MongoDB / MongoDB Atlas with unique indexing and compound indexing on accession codes.
-- **Testing & Quality**: Vitest integration tests with in-memory MongoDB (`mongodb-memory-server`), automated E2E smoke tests, ESLint & TypeScript compilation checks.
+https://nscc-library-management-system.onrender.com/
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Client (React + Vite)                  │
-│  - Dashboard with live DB stats & active loans table       │
-│  - Books & Physical Copies catalog with search/filters      │
-│  - Issue & Return terminal (Camera QR Scanner + Manual)     │
-│  - Transaction History with xlsx spreadsheet export         │
-│  - Printable QR barcode label sheets                        │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ JSON REST API
-┌──────────────────────────────▼──────────────────────────────┐
-│                    Backend (Express + Node.js)              │
-│  - /api/books         : Book title & copy management        │
-│  - /api/copies        : Accession code QR lookup            │
-│  - /api/transactions  : Atomic Issue & Return workflows     │
-│  - /api/dashboard     : Live calculated metrics & loans     │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Mongoose Driver (Session/Atomic)
-┌──────────────────────────────▼──────────────────────────────┐
-│                  MongoDB / MongoDB Atlas                    │
-│  - Books (titles, metadata, counts)                         │
-│  - BookCopies (unique accessionCode, status AVAILABLE/ISSUED)│
-│  - Transactions (status ISSUED/RETURNED, dates, borrower)   │
-└─────────────────────────────────────────────────────────────┘
-```
 
----
 
-## 2. Core Features & Business Workflows
+The Vercel URL is the user-facing frontend. The Render URL hosts the Express backend API.
 
-1. **Catalog & Copy Management**:
-   - Create books with title, author, category, ISBN, and initial copies.
-   - Automatically assigns or accepts custom accession codes (e.g., `ACC-CS-101`).
-   - Add new physical copies to existing titles at any time.
-   - Live availability tracking (`availableCopies` dynamically synchronized with `BookCopy` statuses).
+📌 Project Overview
 
-2. **Search & Filtering**:
-   - Real-time search across Title, Author, ISBN, and Accession Code.
-   - Category filtering (Computer Science, Mathematics, Physics, etc.).
-   - Availability filtering: **All**, **Available Only**, or **Issued Only**.
+The system is designed around physical book copies, not just book titles. Each physical copy receives a unique Accession Code and QR code, allowing the library to track the exact copy that is issued or returned.
 
-3. **QR Code Workflow & Accession Tracking**:
-   - Every physical copy generates an individual QR code encoding its unique accession code.
-   - **Camera QR Scanner**: Real-time webcam scanning using `html5-qrcode`.
-   - **Manual Accession-Code Fallback**: Reliable keyboard/barcode input with instant validation.
-   - **Printable Labels**: Generates standardized, printable QR label sheets for physical book spine placement.
+Main capabilities
 
-4. **Atomic Issue Workflow**:
-   - Selects physical copy by accession code.
-   - Validates copy status (`AVAILABLE`), borrower name, borrower roll number, and future due date.
-   - Uses atomic session transactions to transition copy to `ISSUED` and insert an open transaction record.
-   - **Double-Issue Prevention**: Rejects duplicate issues with clean 400 Bad Request error.
+Book and physical-copy management
 
-5. **Atomic Return Workflow**:
-   - Scans accession code upon return.
-   - Validates copy is currently in `ISSUED` state.
-   - Atomically updates transaction status to `RETURNED`, sets `returnDate`, records optional return condition remarks, and restores copy status to `AVAILABLE`.
-   - **Duplicate-Return Prevention**: Rejects returning copies that are already available on library shelves.
+Unique accession codes
 
-6. **Dashboard & Overdue Analytics**:
-   - Live counts directly calculated from MongoDB collections:
-     - Total Titles
-     - Total Physical Copies
-     - Available Copies
-     - Currently Issued Copies
-     - Overdue Copies (active loans past due date)
-     - Active Transactions count
-   - **Active Loans Table**: Real-time view of currently issued books with borrower name, roll number, issue date, due date, overdue tag, and quick return actions.
+QR code generation
 
-7. **Member Management & Contact Tracking**:
-   - Register students, faculty members, and institutional staff with auto-generated unique membership IDs (e.g. `STU-2026-0042`, `FAC-2026-0001`).
-   - Track contact information (full name, email, phone number, academic department).
-   - Configurable borrowing quota (default 3 books for students, 5 for faculty).
-   - Safe lifecycle management: blocks member deactivation/deletion if member holds unreturned book copies.
-   - Quick-select integration into the Issue & Return terminal for instantaneous autofill.
+Camera-based QR scanning
 
-8. **XLSX Transaction History Export**:
-   - Generates Excel workbook using the `xlsx` library with columns: Sl No, Accession Code, Book Title, Author, Category, ISBN, Borrower Name, Roll Number, Issue Date, Due Date, Return Date, Status, Overdue, and Remarks.
+Manual accession-code fallback
 
----
+Book issue and return
 
+Duplicate issue/return prevention
+
+Transaction history
+
+Overdue tracking
+
+Member management
+
+Borrowing limits
+
+Dashboard analytics
+
+XLSX transaction export
+
+Printable QR labels
+
+Server-side validation and error handling
+
+🏗️ Architecture
+
+┌──────────────────────────────┐
+│       React + Vite           │
+│          Frontend            │
+│           Vercel             │
+└──────────────┬───────────────┘
+               │
+               │ REST API / JSON
+               ▼
+┌──────────────────────────────┐
+│      Node.js + Express       │
+│           Backend            │
+│           Render             │
+└──────────────┬───────────────┘
+               │
+               │ Mongoose
+               ▼
+┌──────────────────────────────┐
+│        MongoDB Atlas         │
+│          Database            │
+└──────────────────────────────┘
+
+🛠️ Technology Stack
+
+Frontend
+
+React
+
+Vite
+
+html5-qrcode
+
+Lucide React
+
+Fetch API
+
+CSS
+
+Backend
+
+Node.js
+
+Express.js
+
+Mongoose
+
+qrcode
+
+xlsx
+
+Database
+
+MongoDB
+
+MongoDB Atlas
+
+Testing
+
+Vitest
+
+Supertest
+
+MongoDB Memory Server
+
+API smoke tests
+
+Deployment
+
+Vercel — Frontend
+
+Render — Backend
+
+MongoDB Atlas — Database
+
+✨ Core Features & Workflows
+
+1. Book & Physical Copy Management
+
+Administrators can:
+
+Create books with title, author, ISBN and category
+
+Add multiple physical copies
+
+Generate unique accession codes
+
+Add copies to existing titles
+
+View copy availability
+
+Archive records when required
+
+Each physical copy is independently tracked.
+
+Example:
+
+Introduction to Algorithms
+
+ACC-CS-001 → AVAILABLE
+ACC-CS-002 → ISSUED
+ACC-CS-003 → AVAILABLE
+
+2. QR Code Workflow
+
+Every physical copy receives an individual QR code containing its unique accession code.
+
+The system supports:
+
+QR generation
+
+QR lookup
+
+Camera-based QR scanning
+
+Manual accession-code entry
+
+Printable QR labels
+
+Camera scanning is implemented using html5-qrcode.
+
+3. Book Issue Workflow
+
+The circulation workflow allows an operator to:
+
+Scan or enter the accession code
+
+Verify the physical copy
+
+Select a registered member
+
+Set the due date
+
+Issue the copy
+
+The backend validates:
+
+Copy existence
+
+Copy availability
+
+Borrower details
+
+Due date
+
+Duplicate issue attempts
+
+An already-issued copy cannot be issued again.
+
+4. Book Return Workflow
+
+A physical copy can be returned using its QR/accession code.
+
+The backend:
+
+Verifies that the copy is currently issued
+
+Closes the active transaction
+
+Stores the return timestamp
+
+Updates the copy to AVAILABLE
+
+Calculates overdue status where applicable
+
+Records optional remarks
+
+Duplicate return attempts are rejected.
+
+5. Dashboard & Overdue Analytics
+
+The dashboard provides live circulation information including:
+
+Total book titles
+
+Total physical copies
+
+Available copies
+
+Issued copies
+
+Overdue copies
+
+Active transactions
+
+The active-loans view shows borrower details, issue dates, due dates and overdue status.
+
+6. Search & Filtering
+
+Books can be searched and filtered using:
+
+Title
+
+Author
+
+ISBN
+
+Accession Code
+
+Category
+
+Availability
+
+Transactions can be filtered using:
+
+Borrower
+
+Accession code
+
+Status
+
+Overdue status
+
+7. Member Management
+
+The system supports registered:
+
+Students
+
+Faculty
+
+Staff
+
+Member information can include:
+
+Membership ID
+
+Name
+
+Roll/employee number
+
+Email
+
+Phone
+
+Department
+
+Role
+
+Borrowing limit
+
+Active/inactive status
+
+The system also supports member lookup and safe lifecycle management when active books are still on loan.
+
+8. Transaction History
+
+Each circulation record stores:
+
+Book
+
+Physical copy
+
+Accession code
+
+Borrower
+
+Issue timestamp
+
+Due date
+
+Return timestamp
+
+Status
+
+Overdue information
+
+Remarks
+
+This provides a complete history of book circulation.
+
+9. XLSX Export
+
+Transaction history can be exported as an Excel workbook containing fields such as:
+
+Accession Code
+
+Book Title
+
+Author
+
+Category
+
+ISBN
+
+Borrower Name
+
+Roll Number
+
+Issue Date
+
+Due Date
+
+Return Date
+
+Status
+
+Overdue
+
+Remarks
 ## 3. Environment Variables
 
 Create `.env` in `server/` (or root for unified runtime):
