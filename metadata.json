@@ -1,0 +1,6 @@
+{
+  "name": "Library Management System",
+  "description": "Library book issue and return management system with physical copy tracking, QR generation and scanning, transaction history, overdue tracking, and live dashboard analytics.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

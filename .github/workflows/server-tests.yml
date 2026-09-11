@@ -1,0 +1,35 @@
+name: Server Tests and CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Backend Tests & Smoke Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'server/package.json'
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm install
+
+      - name: Run server test suite
+        working-directory: server
+        run: npm test
+
+      - name: Run server smoke test
+        working-directory: server
+        run: npm run smoke
